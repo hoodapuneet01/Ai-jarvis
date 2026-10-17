@@ -1,36 +1,31 @@
-# JARVIS AI (Android) - Phase 1
+# JARVIS AI (Android) - Phase 2: teachable commands
 
-Phase 1 delivers the Flutter shell and the animated interface only.
+No API key and no AI model. You teach it phrases and replies; it stores them on the phone.
 
-## What works in this build
-- Animated AI core with 7 distinct states (idle, listening, thinking, speaking, executing, error, offline)
-- Particle background, glass panels, live date and time
-- Settings > Animation preview to view every state
-- Sending text reports honestly that no backend is connected
+## What works
+- Animated AI core (7 states), particles, glass UI, live date and time
+- Chat: say "Jarvis, good morning" and get the reply you taught for "good morning"
+- Unknown phrase: it says so and offers "Teach this"
+- Taught commands screen: add, edit, delete (with confirmation), stored in on-device SQLite
+- Matching ignores case, punctuation, extra spaces, and a leading "Jarvis"
 
-## What is deliberately not built yet
-Chat, speech, TTS, notes, history, reminders, app launching, web search, documents, Firebase.
-Their buttons are either disabled or open a screen saying "Not available yet".
-Nothing is simulated. The app requests no permissions and sends no data.
+## Limits (by design, not hidden)
+- Exact matching only. It cannot answer questions you haven't taught it.
+- Replies are text only. Actions such as "open YouTube" arrive in the app-launching phase.
+- No voice, notes, reminders, history, search or documents yet (screens say "Not available yet").
+- Chat messages are not saved after you leave the chat screen.
 
 ## Verification status
-The code was written in an environment with no Flutter SDK and no network.
-It has NOT been compiled, analyzed, or tested. Run the steps below and fix anything they surface.
+Phase 1 passed `flutter analyze` and `flutter test` on a real Flutter install.
+Phase 2 code has not been compiled or tested by the author. Run the commands below.
 
-## Setup
-1. Install Flutter (stable, Dart >= 3.3) and the Android SDK.
-2. Create the Android scaffolding, then copy this project's files over it:
-   ```
-   flutter create --platforms=android --project-name jarvis_ai jarvis_ai
-   ```
-   Copy `lib/`, `test/` and `pubspec.yaml` from this folder into the new `jarvis_ai/`, replacing the defaults.
-3. From the project folder:
-   ```
-   flutter pub get
-   flutter analyze
-   flutter test
-   flutter run
-   ```
+## Run
+```
+flutter pub get
+flutter analyze
+flutter test
+flutter run     # needs an emulator or a connected Android phone
+```
 
-## Next: Phase 2
-FastAPI backend with OpenAI. The API key lives in a backend environment variable (`OPENAI_API_KEY`), never in the APK.
+## Later
+Optional local model (Ollama) or OpenAI for open questions, behind the same chat screen.
