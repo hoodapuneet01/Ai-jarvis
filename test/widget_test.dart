@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jarvis_ai/app.dart';
 import 'package:jarvis_ai/models/core_state.dart';
+import 'package:jarvis_ai/screens/feature_stub_screen.dart';
+import 'package:jarvis_ai/screens/settings_screen.dart';
 import 'package:jarvis_ai/widgets/ai_core.dart';
 
 void usePhoneScreen(WidgetTester tester) {
@@ -59,26 +61,45 @@ void main() {
     await tester.pumpWidget(const JarvisApp());
 
     await tester.tap(find.byTooltip('Notes'));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
-    expect(find.text('Not available yet'), findsOneWidget);
+    expect(find.byType(FeatureStubScreen), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(FeatureStubScreen),
+        matching: find.text('Not available yet'),
+      ),
+      findsOneWidget,
+    );
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
   testWidgets('animation preview switches the core state', (tester) async {
     usePhoneScreen(tester);
-    await tester.pumpWidget(const JarvisApp());
+    await tester.pumpWidget(const MaterialApp(home: CorePreviewScreen()));
+    await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.tap(find.byTooltip('Settings'));
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.tap(find.text('Animation preview'));
-    await tester.pump(const Duration(milliseconds: 500));
     await tester.tap(find.text('Thinking'));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 300));
 
     final core = tester.widget<AiCore>(find.byType(AiCore));
     expect(core.state, CoreState.thinking);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('settings opens the animation preview', (tester) async {
+    usePhoneScreen(tester);
+    await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
+
+    expect(find.text('Animation preview'), findsOneWidget);
+    await tester.tap(find.text('Animation preview'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(CorePreviewScreen), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

@@ -138,9 +138,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         icon: const Icon(Icons.settings_outlined),
                         onPressed: () => _open(const SettingsScreen()),
                       ),
-                      IconButton(
+                      const IconButton(
                         tooltip: 'Stop speaking',
-                        icon: const Icon(Icons.stop_circle_outlined),
+                        icon: Icon(Icons.stop_circle_outlined),
                         // Nothing can speak yet, so this stays disabled.
                         onPressed: null,
                       ),
