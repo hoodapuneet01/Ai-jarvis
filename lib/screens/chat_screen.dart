@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../models/chat_message.dart';
+import '../services/app_services.dart';
 import '../services/command_engine.dart';
-import '../services/command_store.dart';
 import '../widgets/chat_bubble.dart';
+import '../widgets/voice_button.dart';
 import 'teach_screen.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key, required this.store, this.initialMessage});
+  const ChatScreen({super.key, required this.services, this.initialMessage});
 
-  final CommandStore store;
+  final AppServices services;
   final String? initialMessage;
 
   @override
@@ -19,7 +20,8 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _input = TextEditingController();
   final _messages = <ChatMessage>[];
-  late final CommandEngine _engine = CommandEngine(widget.store);
+  AppServices get _s => widget.services;
+  late final CommandEngine _engine = CommandEngine(_s.store);
 
   @override
   void initState() {
@@ -34,8 +36,20 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _s.tts.stop();
     _input.dispose();
     super.dispose();
+  }
+
+  void _toast(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _speak(String text) async {
+    if (!_s.settings.speakReplies) return;
+    await _s.tts.stop();
+    final problem = await _s.tts.speak(text, rate: _s.settings.speechRate);
+    if (problem != null && mounted) _toast(problem);
   }
 
   Future<void> _submit(String raw) async {
@@ -54,14 +68,21 @@ class _ChatScreenState extends State<ChatScreen> {
     }
     if (!mounted) return;
     setState(() => _messages.add(reply));
+    _speak(reply.text);
   }
 
   Future<void> _teach(String phrase) async {
-    final saved = await showTeachDialog(context, widget.store, phrase: phrase);
+    final saved = await showTeachDialog(context, _s.store, phrase: phrase);
     if (!saved || !mounted) return;
     setState(() => _messages.add(const ChatMessage(
         "Saved. Say it again and I'll reply.",
         fromUser: false)));
+  }
+
+  void _sendTyped() {
+    final text = _input.text;
+    _input.clear();
+    _submit(text);
   }
 
   @override
@@ -70,11 +91,19 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         title: const Text('Chat'),
         actions: [
+          ValueListenableBuilder<bool>(
+            valueListenable: _s.tts.speaking,
+            builder: (context, speaking, _) => IconButton(
+              tooltip: 'Stop speaking',
+              icon: const Icon(Icons.stop_circle_outlined),
+              onPressed: speaking ? () => _s.tts.stop() : null,
+            ),
+          ),
           IconButton(
             tooltip: 'Taught commands',
             icon: const Icon(Icons.school_outlined),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                builder: (_) => TeachScreen(store: widget.store))),
+                builder: (_) => TeachScreen(store: _s.store))),
           ),
         ],
       ),
@@ -119,10 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: TextField(
                       controller: _input,
                       textInputAction: TextInputAction.send,
-                      onSubmitted: (v) {
-                        _submit(v);
-                        _input.clear();
-                      },
+                      onSubmitted: (_) => _sendTyped(),
                       decoration: const InputDecoration(
                           hintText: 'Type a message', border: InputBorder.none),
                     ),
@@ -130,10 +156,19 @@ class _ChatScreenState extends State<ChatScreen> {
                   IconButton(
                     tooltip: 'Send message',
                     icon: const Icon(Icons.arrow_upward),
-                    onPressed: () {
-                      _submit(_input.text);
-                      _input.clear();
+                    onPressed: _sendTyped,
+                  ),
+                  VoiceButton(
+                    speech: _s.speech,
+                    onPartial: (t) {
+                      _input.text = t;
+                      _input.selection = TextSelection.collapsed(offset: t.length);
                     },
+                    onFinal: (t) {
+                      _input.clear();
+                      _submit(t);
+                    },
+                    onMessage: _toast,
                   ),
                 ],
               ),

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 import 'config.dart';
 import 'screens/home_screen.dart';
-import 'services/command_store.dart';
+import 'services/app_services.dart';
 import 'theme.dart';
 
 class JarvisApp extends StatelessWidget {
-  const JarvisApp({super.key, required this.store});
+  const JarvisApp({super.key, required this.services});
 
-  final CommandStore store;
+  final AppServices services;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,7 @@ class JarvisApp extends StatelessWidget {
       title: kAssistantName,
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
-      home: HomeScreen(store: store),
+      home: HomeScreen(services: services),
     );
   }
 }
