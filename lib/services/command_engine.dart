@@ -1,16 +1,17 @@
+import '../config.dart';
 import '../models/taught_command.dart';
 import 'command_store.dart';
 
 /// Lowercases, drops punctuation, collapses spaces, and removes a leading
-/// "jarvis" so "Jarvis, Good morning!" matches "good morning".
+/// wake word so "Hooda, Good morning!" matches "good morning".
 String normalizePhrase(String input) {
   var s = input
       .toLowerCase()
       .replaceAll(RegExp(r'[^\p{L}\p{N}\s]', unicode: true), '')
       .replaceAll(RegExp(r'\s+'), ' ')
       .trim();
-  if (s == 'jarvis') return '';
-  if (s.startsWith('jarvis ')) s = s.substring(7);
+  if (s == kWakeWord) return '';
+  if (s.startsWith('$kWakeWord ')) s = s.substring(kWakeWord.length + 1);
   return s;
 }
 

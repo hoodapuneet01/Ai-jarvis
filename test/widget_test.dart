@@ -22,10 +22,10 @@ Future<void> settle(WidgetTester tester) async {
 
 void main() {
   group('normalizePhrase', () {
-    test('ignores case, punctuation, spacing and a leading Jarvis', () {
-      expect(normalizePhrase('Jarvis,  Good   MORNING!'), 'good morning');
+    test('ignores case, punctuation, spacing and a leading Hooda', () {
+      expect(normalizePhrase('Hooda,  Good   MORNING!'), 'good morning');
       expect(normalizePhrase('good morning'), 'good morning');
-      expect(normalizePhrase('jarvis'), '');
+      expect(normalizePhrase('hooda'), '');
       expect(normalizePhrase('   '), '');
     });
   });
@@ -36,7 +36,7 @@ void main() {
       await store.add('good morning', 'Morning!');
       final engine = CommandEngine(store);
 
-      expect((await engine.match('Jarvis, good morning!'))?.response, 'Morning!');
+      expect((await engine.match('Hooda, good morning!'))?.response, 'Morning!');
       expect(await engine.match('good evening'), isNull);
       expect(await engine.match(''), isNull);
     });
@@ -84,7 +84,7 @@ void main() {
     await store.add('good morning', 'Good morning, boss');
     await tester.pumpWidget(JarvisApp(store: store));
 
-    await tester.enterText(find.byType(TextField), 'Jarvis, good morning!');
+    await tester.enterText(find.byType(TextField), 'Hooda, good morning!');
     await tester.tap(find.byTooltip('Send'));
     await settle(tester);
     await settle(tester);

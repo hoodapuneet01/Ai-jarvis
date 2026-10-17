@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'config.dart';
 import 'screens/home_screen.dart';
 import 'services/command_store.dart';
 import 'theme.dart';
@@ -12,7 +13,7 @@ class JarvisApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'JARVIS AI',
+      title: kAssistantName,
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
       home: HomeScreen(store: store),
