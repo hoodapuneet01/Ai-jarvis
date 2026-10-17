@@ -4,15 +4,20 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../models/core_state.dart';
+import '../services/command_store.dart';
 import '../widgets/ai_core.dart';
 import '../widgets/glass_panel.dart';
 import '../widgets/particle_field.dart';
 import '../widgets/status_indicator.dart';
+import 'chat_screen.dart';
 import 'feature_stub_screen.dart';
 import 'settings_screen.dart';
+import 'teach_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, required this.store});
+
+  final CommandStore store;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -20,28 +25,22 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _input = TextEditingController();
-  Timer? _errorReset;
-
-  // No backend exists in this build, so the honest state is offline.
-  CoreState _state = CoreState.offline;
+  // Taught commands run on this phone, so the core is ready (idle).
+  final CoreState _state = CoreState.idle;
 
   @override
   void dispose() {
-    _errorReset?.cancel();
     _input.dispose();
     super.dispose();
   }
 
   void _send() {
-    if (_input.text.trim().isEmpty) return;
-    _errorReset?.cancel();
-    setState(() => _state = CoreState.error);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text("The AI backend isn't connected, so this message wasn't sent."),
+    final text = _input.text.trim();
+    if (text.isEmpty) return;
+    _input.clear();
+    Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => ChatScreen(store: widget.store, initialMessage: text),
     ));
-    _errorReset = Timer(const Duration(seconds: 2), () {
-      if (mounted) setState(() => _state = CoreState.offline);
-    });
   }
 
   void _open(Widget screen) =>
@@ -65,8 +64,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       const Spacer(),
                       Flexible(
                         child: StatusIndicator(
-                          label: 'Backend not configured',
-                          color: CoreState.offline.color,
+                          label: 'Local commands, no AI model',
+                          color: CoreState.idle.color,
                         ),
                       ),
                     ],
@@ -107,8 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           title: 'History',
                           icon: Icons.history,
                           description:
-                              'Saved conversations need the AI chat and local '
-                              'database, which come in later builds.',
+                              'Saved conversations need the local database '
+                              'wiring for chat, which comes in a later build.',
                         )),
                       ),
                       IconButton(
@@ -132,6 +131,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               'Reminders need notification scheduling and '
                               "permission handling, which haven't been built yet.",
                         )),
+                      ),
+                      IconButton(
+                        tooltip: 'Taught commands',
+                        icon: const Icon(Icons.school_outlined),
+                        onPressed: () => _open(TeachScreen(store: widget.store)),
                       ),
                       IconButton(
                         tooltip: 'Settings',

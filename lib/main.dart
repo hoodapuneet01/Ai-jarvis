@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'app.dart';
+import 'services/command_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,5 +13,6 @@ Future<void> main() async {
     systemNavigationBarColor: Colors.black,
     systemNavigationBarIconBrightness: Brightness.light,
   ));
-  runApp(const JarvisApp());
+  final store = await SqliteCommandStore.open();
+  runApp(JarvisApp(store: store));
 }

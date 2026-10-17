@@ -23,18 +23,18 @@ class SettingsScreen extends StatelessWidget {
           ),
           const ListTile(
             leading: Icon(Icons.cloud_off_outlined),
-            title: Text('AI backend'),
+            title: Text('AI model'),
             subtitle: Text(
-              'Not configured. Chat arrives in the next build and needs an '
-              'OpenAI API key stored on the backend, never in the app.',
+              'None connected. Replies come only from commands you taught. '
+              'Open questions need a model, which can be added later.',
             ),
           ),
           const ListTile(
             leading: Icon(Icons.lock_outline),
             title: Text('Privacy'),
             subtitle: Text(
-              "This build doesn't record audio, request permissions, or send "
-              'data anywhere.',
+              "Taught commands are stored on this phone only. This build doesn't "
+              'record audio, request permissions, or send data anywhere.',
             ),
           ),
         ],
